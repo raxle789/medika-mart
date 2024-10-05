@@ -1,100 +1,210 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAppDispatch } from "@/redux/hook";
+import { setAddItem } from "@/redux/features/cart-slice";
+// import { setIsLogin } from "@/redux/features/auth-slice";
+// import { useAppSelector } from "@/redux/hook";
+// import type { RootState } from "@/redux/store";
+import { getUserDataFromCookies } from "@/lib/authentication";
+import Header from "@/components/header";
+import Image, { StaticImageData } from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import bannerImg from "../../public/assets/images/banner1.jpg";
+import { IoCheckmarkCircle } from "react-icons/io5";
+import { products } from "@/utils/products";
+import { FaFacebookF } from "react-icons/fa";
+import { FaTwitter } from "react-icons/fa";
+import { FaYoutube } from "react-icons/fa";
+import { FaInstagram } from "react-icons/fa";
+import { FaLinkedinIn } from "react-icons/fa";
+
+type TUserData = {
+  uid?: string;
+  email?: string | null;
+  displayName?: string | null;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLogin, setIsLogin] = useState<TUserData | null>(null);
+  // const isLogin = useAppSelector((state: RootState) => state.auth);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleToCart = (
+    id: number,
+    name: string,
+    price: number,
+    url: StaticImageData
+  ) => {
+    const user = getUserDataFromCookies();
+    if (user) {
+      const newItem = {
+        id: id,
+        name: name,
+        price: price,
+        url: url,
+        // amount: amount,
+        // subTotal: subTotal,
+      };
+      console.log({ newItem });
+      dispatch(setAddItem(newItem));
+      toast({
+        title: "Item added to cart!",
+      });
+    } else {
+      setIsDrawerOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const user = getUserDataFromCookies();
+    if (user) {
+      // console.log({ user });
+      setIsLogin(user);
+    } else {
+      console.log("No user data found in cookies.");
+    }
+  }, []);
+  return (
+    <div>
+      <Header isDrawerOpen={isDrawerOpen} setIsDrawerOpen={setIsDrawerOpen} />
+
+      <div id="beranda" className="relative h-[90vh]">
+        <Image
+          className="absolute w-full h-full object-left xl:object-center object-cover"
+          src={bannerImg}
+          alt="banner"
+        />
+        <div className="relative z-10 flex flex-col justify-center items-start h-full text-white px-5 lg:px-10">
+          <h1 className="text-[1.6rem] text-base tracking-wide md:text-4xl lg:text-5xl font-bold text-coolyellow">
+            All Medical Needs, One Solution.
+          </h1>
+          <div className="flex items-start justify-center gap-3 mt-3">
+            <h2 className="text-base font-semibold p-4 md:px-8 xl:px-0 md:text-xl md:p-0 lg:text-xl">
+              Easy
+            </h2>
+            <IoCheckmarkCircle className="text-[#31ff40] w-7 h-auto" />
+            <h2 className="text-base font-semibold p-4 md:px-8 xl:px-0 md:text-xl md:p-0 lg:text-xl">
+              Cheap
+            </h2>
+            <IoCheckmarkCircle className="text-[#31ff40] w-7 h-auto" />
+            <h2 className="text-base font-semibold p-4 md:px-8 xl:px-0 md:text-xl md:p-0 lg:text-xl">
+              Trusted
+            </h2>
+            <IoCheckmarkCircle className="text-[#31ff40] w-7 h-auto" />
+          </div>
+          {/* <div>
+            <h2 className="font-bold text-xl">Number of Sales:</h2>
+            <p>2500+</p>
+          </div> */}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+        <div className="absolute inset-0 bg-black opacity-40 z-0" />
+      </div>
+
+      <section className="px-12 py-16">
+        {products.map((category, categoryIndex) => (
+          <div key={categoryIndex} className="category-section m-8">
+            {/* Menampilkan nama kategori */}
+            <h2 className="category-title text-2xl font-bold">
+              {category.category}
+            </h2>
+
+            {/* Iterasi melalui items di dalam kategori */}
+            <div className="items-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {category.items.map((item) => (
+                <Card key={item.id} className="w-[350px]">
+                  <CardHeader>
+                    <CardTitle className="text-lg leading-4">
+                      {item.name}
+                    </CardTitle>
+                    <CardDescription>
+                      Price: IDR {item.price.toLocaleString()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative h-[200px] w-full">
+                      {item.url ? (
+                        <Image
+                          className="rounded-xl h-full w-full object-cover"
+                          src={item.url}
+                          alt={`${item.name} image`}
+                        />
+                      ) : (
+                        <Skeleton className="h-full w-full rounded-xl" />
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <div></div>
+                    <Button
+                      onClick={() =>
+                        handleToCart(item.id, item.name, item.price, item.url)
+                      }
+                    >
+                      Add to Cart
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <footer className="bg-blue-600 py-12 flex items-center justify-center">
+        <div className="w-[75%]">
+          <div className="grid grid-cols-3 mb-14">
+            <div>
+              <h1 className="text-white text-lg font-bold mb-3">MedikaMart</h1>
+              <p className="text-base text-white">About Us</p>
+              <p className="text-base text-white">Career</p>
+              <p className="text-base text-white">Contact Us</p>
+              <p className="text-base text-white">Support Service</p>
+            </div>
+            <div>
+              <h3 className="text-white text-lg font-bold mb-3">Others</h3>
+              <p className="text-base text-white">Terms & Condition</p>
+              <p className="text-base text-white">Privacy</p>
+              <p className="text-base text-white">Ads</p>
+            </div>
+            <div>
+              <h3 className="text-white text-lg font-bold">Sosial Media</h3>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="p-2 rounded-full bg-white">
+                  <FaFacebookF className="text-lg text-blue-600" />
+                </div>
+                <div className="p-2 rounded-full bg-white">
+                  <FaTwitter className="text-lg text-blue-600" />
+                </div>
+                <div className="p-2 rounded-full bg-white">
+                  <FaLinkedinIn className="text-lg text-blue-600" />
+                </div>
+                <div className="p-2 rounded-full bg-white">
+                  <FaInstagram className="text-lg text-blue-600" />
+                </div>
+                <div className="p-2 rounded-full bg-white">
+                  <FaYoutube className="text-lg text-blue-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="text-base text-white">
+            Copyright © 2024 MedikaMart. This website is a personal project, not
+            a real company.
+          </p>
+        </div>
       </footer>
     </div>
   );
