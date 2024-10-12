@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useAppDispatch } from "@/redux/hook";
-import { setAddAmount, setSubtractAmount } from "@/redux/features/cart-slice";
+import {
+  setAddAmount,
+  setSubtractAmount,
+  setFillOrEmpty,
+} from "@/redux/features/cart-slice";
+import { setSection } from "@/redux/features/profile-section";
+import { setAuthorized } from "@/redux/features/cart-fetch-slice";
 // import { setIsLogin } from "@/redux/features/auth-slice";
+// import { TUserDoc } from "@/lib/firebase.utils";
 import { useAppSelector } from "@/redux/hook";
 import type { RootState } from "@/redux/store";
 import Cookies from "js-cookie";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PopupSignIn, signOutUser, auth } from "@/lib/firebase.utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -55,7 +62,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { ShoppingCart, Search, Plus, Minus } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { getUserField } from "@/lib/firebase.utils";
+import {
+  getUserField,
+  addCollectionAndDocument,
+  getActivityDoc,
+} from "@/lib/firebase.utils";
+import { v4 as uuidv4 } from "uuid";
 
 export type TUserData = {
   uid?: string | null;
@@ -70,6 +82,21 @@ type TCartItem = {
   url: StaticImageData;
   amount: number;
   subTotal: number;
+};
+
+// type TCheckoutItem = {
+//   id: number;
+//   name: string;
+//   price: number;
+//   quantity: number;
+//   url: StaticImageData;
+// };
+
+export type TCheckoutData = {
+  data?: {
+    orderId: string;
+    items: any;
+  }[];
 };
 
 const signInSchema = z.object({
@@ -101,17 +128,29 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isLogin, setIsLogin] = useState<TUserData | null>(null);
   const [logInState, setLogInState] = useState<string>("Log in");
-  const [searchInput, setSearchInput] = useState<boolean>(false);
+  // const [searchInput, setSearchInput] = useState<boolean>(false);
   const [cartItemsNow, setCartItemsNow] = useState<TCartItem[]>([]);
+  const [checkoutData, setCheckoutData] = useState<TCheckoutData | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [errorAuth, setErrorAuth] = useState(false);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const cartFetchPass = useAppSelector(
+    (state: RootState) => state.cartFetchAuthorized
+  );
   const cartItems = useAppSelector((state: RootState) => state.cart);
-  // const isLogin = useAppSelector((state: RootState) => state.auth);
   const formSchema = logInState === "Log in" ? signInSchema : signUpSchema;
+  // const [userData, setUserData] = useState<TUserDoc | null | undefined>(null);
+  // const userData = useAppSelector((state: RootState) => state.userData);
+  // const isLogin = useAppSelector((state: RootState) => state.auth);
+
+  // get value from query params
+  const orderId = searchParams.get("order_id");
+  const statusCode = searchParams.get("status_code");
+  const transactionStatus = searchParams.get("transaction_status");
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -132,6 +171,27 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       setIsDrawerOpen(!isDrawerOpen);
     }
   };
+
+  // function isTUserDoc(data: any): data is TUserDoc {
+  //   return (
+  //     data.username !== undefined &&
+  //     data.email !== undefined &&
+  //     data.dateOfBirth !== undefined &&
+  //     data.gender !== undefined
+  //   );
+  // }
+
+  // const getPersonalData = async () => {
+  //   const user = getUserDataFromCookies();
+  //   const data = await getUserField(user.uid);
+  //   if (data && isTUserDoc(data)) {
+  //     // setUserData(data);
+  //     return data;
+  //     // dispatch(setUserData(data));
+  //   } else {
+  //     console.log("Data doesn't match for TUserDoc type or doesn't exist");
+  //   }
+  // };
 
   const handleSignInWithGoogle = async () => {
     try {
@@ -237,19 +297,32 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
   // Function to handle sign out
   const handleSignOut = async () => {
     await signOutUser();
+    if (isLogin && isLogin.uid) {
+      const cartItemsObj = {
+        cartItems: cartItemsNow,
+      };
+      await addCollectionAndDocument(isLogin.uid, "cart", cartItemsObj);
+    }
     console.log("user signed out!");
     // Remove user data from cookies
     Cookies.remove("medikaMart-userData");
     console.log("cookies removed");
-    const userSigned: TUserData = {
-      uid: null,
-      email: null,
-      displayName: null,
-      // password: password,
-    };
+    // const userSigned: TUserData = {
+    //   uid: null,
+    //   email: null,
+    //   displayName: null,
+    // };
     // setIsLogin(userSigned);
     setIsLogin(null);
+    const fillOrEmptyPayload = {
+      type: "empty",
+    };
+    dispatch(setFillOrEmpty(fillOrEmptyPayload));
+    dispatch(setAuthorized(true));
     router.replace("/");
+    if (setIsDrawerOpen) {
+      setIsDrawerOpen(false);
+    }
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -260,6 +333,15 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       signUpWithEmail(values.email, values.password);
     }
   }
+
+  const getActivityDocHandler = async (uid: string, docTitle: string) => {
+    const docSnapshot = await getActivityDoc(uid, docTitle);
+    return docSnapshot;
+  };
+
+  const saveActivityDocHandler = async (uid: string, data: any) => {
+    await addCollectionAndDocument(uid, "checkout", data);
+  };
 
   const handleItemAmount = (id: number, type: string) => {
     if (type === "add amount") {
@@ -277,36 +359,165 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
     }
   };
 
-  useEffect(() => {
-    if (pathname.includes("/my-profile")) {
-      setSearchInput(false);
-    } else if (pathname.includes("/checkout")) {
-      setSearchInput(false);
-    } else {
-      setSearchInput(true);
-    }
-  }, [pathname]);
+  const handleCheckout = async () => {
+    const id = uuidv4();
+    let data: any = {
+      orderId: id,
+      cart: [],
+      totalPrice: totalPrice,
+      // customerData: userData,
+    };
+    cartItems.items.forEach((item: any, index: number) => {
+      const newItem = {
+        ...item,
+        quantity: cartItems.itemsTotalData[index].amount,
+      };
+      data.cart.push(newItem);
+    });
+    console.log({ data });
+
+    const response = await fetch("/api/midtrans-tokenizer", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    const requestData = await response.json();
+    console.log({ requestData });
+    (window as any).snap.pay(requestData.token);
+  };
+
+  // useEffect(() => {
+  //   if (pathname.includes("/my-profile")) {
+  //     setSearchInput(false);
+  //   } else if (pathname.includes("/checkout")) {
+  //     setSearchInput(false);
+  //   } else {
+  //     setSearchInput(true);
+  //   }
+  // }, [pathname]);
 
   useEffect(() => {
     const user = getUserDataFromCookies();
     if (user) {
       console.log({ user });
       setIsLogin(user);
+      getActivityDoc(user.uid, "checkout")
+        .then((result) => {
+          console.log("checkout fetch result: ", result);
+          setCheckoutData(result.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     } else {
       console.log("No user data found in cookies.");
     }
   }, []);
 
   useEffect(() => {
-    console.log({ isLogin });
+    const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
+
+    const script = document.createElement("script");
+    if (clientKey) {
+      script.src = snapScript;
+      script.setAttribute("data-client-key", clientKey);
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (statusCode === "200" && transactionStatus === "settlement") {
+      console.log("Transaction is successful:", orderId);
+    } else if (statusCode === "201" && transactionStatus === "pending") {
+      console.log("Transaction is pending:", orderId);
+    } else {
+      console.log("Unknown Transaction:", orderId);
+    }
+    // console.log("mulai menyimpan checkout data");
+    const user = getUserDataFromCookies();
+
+    if (user && orderId) {
+      let data: any = {
+        orderId: orderId,
+        cart: [],
+        totalPrice: 0,
+        paymentStatus: transactionStatus,
+      };
+      cartItems.items.forEach((item: any, index: number) => {
+        const newItem = {
+          ...item,
+          quantity: cartItems.itemsTotalData[index].amount,
+        };
+        data.cart.push(newItem);
+        data.totalPrice += cartItems.itemsTotalData[index].subTotal;
+      });
+      let newCheckoutData = {
+        data: [...(checkoutData?.data || [])],
+      };
+      // const newCheckoutItem = {
+      //   orderId: "",
+      //   items: data,
+      // };
+      if (newCheckoutData.data) {
+        newCheckoutData.data.push(data);
+      }
+
+      console.log({ newCheckoutData });
+      // newCheckout.checkoutItems.push(data);
+      saveActivityDocHandler(user.uid, newCheckoutData)
+        .then((result) => {
+          console.log("save checkout is successful: ", result);
+        })
+        .catch((error) => {
+          console.error("Something went wrong:", error);
+        });
+      dispatch(setSection("purchase history"));
+      setCheckoutData(newCheckoutData);
+      if (pathname === "/") {
+        router.push("/my-profile");
+      } else {
+        router.replace("/my-profile");
+      }
+    }
+  }, [statusCode, transactionStatus, orderId]);
+
+  // useEffect(() => {
+  //   console.log({ userData });
+  // }, [userData]);
+
+  useEffect(() => {
+    // console.log({ isLogin });
+    if (cartFetchPass) {
+      if (isLogin && isLogin.uid) {
+        getActivityDocHandler(isLogin.uid, "cart")
+          .then((result) => {
+            console.log("Cart Items:", result.cartItems);
+            const fillOrEmptyPayload = {
+              type: "fill",
+              data: result.cartItems,
+            };
+            dispatch(setFillOrEmpty(fillOrEmptyPayload));
+          })
+          .catch((error) => {
+            console.error("Something went wrong:", error);
+          });
+        dispatch(setAuthorized(false));
+      }
+    }
   }, [isLogin]);
 
   useEffect(() => {
-    console.log({ cartItems });
+    // console.log({ cartItems });
     const currentItems: TCartItem[] = [];
     let totalPriceNow: number = 0;
     if (cartItems.items) {
-      cartItems.items.forEach((item) => {
+      cartItems.items.forEach((item: any) => {
         const newItem = {
           id: item.id,
           name: item.name,
@@ -316,7 +527,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
           subTotal: 0,
         };
         const index = cartItems.itemsTotalData.findIndex(
-          (itemTotal) => itemTotal.id === item.id
+          (itemTotal: any) => itemTotal.id === item.id
         );
         newItem.amount = cartItems.itemsTotalData[index].amount;
         newItem.subTotal = cartItems.itemsTotalData[index].subTotal;
@@ -324,7 +535,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
         totalPriceNow += newItem.subTotal;
       });
     }
-    console.log({ currentItems });
+    // console.log({ currentItems });
     setCartItemsNow(currentItems);
     setTotalPrice(totalPriceNow);
   }, [cartItems]);
@@ -338,7 +549,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
           MedikaMart
         </h1>
         <div className="flex items-center gap-3 h-10">
-          {searchInput && (
+          {/*{searchInput && (
             <form className="flex h-full">
               <Input
                 className="rounded-r-none h-full focus-visible:ring-0"
@@ -351,7 +562,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
                 <Search />
               </Button>
             </form>
-          )}
+          )}*/}
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -364,7 +575,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
                 </span>
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="overflow-y-auto">
               <SheetHeader className="my-5">
                 <SheetTitle>My Cart</SheetTitle>
               </SheetHeader>
@@ -431,10 +642,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
               </div>
               <SheetFooter>
                 <SheetClose asChild>
-                  <Button
-                    type="button"
-                    onClick={() => router.push("/checkout")}
-                  >
+                  <Button type="button" onClick={handleCheckout}>
                     Checkout
                   </Button>
                 </SheetClose>

@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getUserDataFromCookies } from "@/lib/authentication";
 import { TUserDoc } from "@/lib/firebase.utils";
-import { addUser } from "@/lib/firebase.utils";
+import { addOrChangeUserData } from "@/lib/firebase.utils";
 
 const formSchema = z.object({
   username: z.string().min(6, {
@@ -71,7 +71,7 @@ export default function AdditionalFormPage() {
       city: values.city,
       phoneNumber: values.phoneNumber,
     };
-    await addUser(user.uid, newUserData);
+    await addOrChangeUserData(user.uid, newUserData);
     router.push("/my-profile");
   }
 

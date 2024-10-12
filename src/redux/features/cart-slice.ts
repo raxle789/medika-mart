@@ -20,6 +20,20 @@ interface IInitState {
   }[];
 }
 
+interface ICartFirestoreItem {
+  id: number;
+  name: string;
+  price: number;
+  url: StaticImageData;
+  amount: number;
+  subTotal: number;
+}
+
+interface IFillOrEmpty {
+  type: string;
+  data?: ICartFirestoreItem[];
+}
+
 const initialState: IInitState = {
   itemsAmount: 0,
   items: [],
@@ -32,7 +46,6 @@ export const cartSlice = createSlice({
   reducers: {
     setAddItem: (state, action: PayloadAction<IItem>) => {
       console.log("addCartPayload: ", action.payload);
-      console.log({ initialState });
       console.log("state.items: ", state.items);
       // console.log({ state.itemsAmount });
       let itemFound: any;
@@ -97,9 +110,37 @@ export const cartSlice = createSlice({
         state.itemsAmount -= 1;
       }
     },
+    setFillOrEmpty: (state, action: PayloadAction<IFillOrEmpty>) => {
+      if (action.payload.type === "fill") {
+        if (action.payload.data) {
+          action.payload.data.forEach((item) => {
+            const newItem = {
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              url: item.url,
+            };
+            state.items.push(newItem);
+
+            const newItemTotalData = {
+              id: item.id,
+              name: item.name,
+              amount: item.amount,
+              subTotal: item.subTotal,
+            };
+            state.itemsTotalData.push(newItemTotalData);
+            state.itemsAmount += item.amount;
+          });
+        }
+      } else {
+        state.itemsAmount = 0;
+        state.items.splice(0, state.items.length);
+        state.itemsTotalData.splice(0, state.itemsTotalData.length);
+      }
+    },
   },
 });
 
-export const { setAddItem, setAddAmount, setSubtractAmount } =
+export const { setAddItem, setAddAmount, setSubtractAmount, setFillOrEmpty } =
   cartSlice.actions;
 export default cartSlice.reducer;

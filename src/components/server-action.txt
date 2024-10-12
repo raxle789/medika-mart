@@ -1,0 +1,34 @@
+window.snap.pay(requestData.token, {
+  onSuccess: function(result: any) {
+    // Handle successful payment
+    console.log('Success:', result);
+    // Kirim result ke server
+    fetch('/api/midtrans-success', {
+      method: 'POST',
+      body: JSON.stringify(result),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  },
+  onPending: function(result: any) {
+    // Handle pending payment
+    console.log('Pending:', result);
+    // Kirim result ke server
+    fetch('/api/midtrans-pending', {
+      method: 'POST',
+      body: JSON.stringify(result),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  },
+  onError: function(result: any) {
+    // Handle failed payment
+    console.log('Error:', result);
+  },
+  onClose: function() {
+    // Handle user closing the payment popup
+    console.log('Payment popup closed');
+  },
+});
