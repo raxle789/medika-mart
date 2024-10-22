@@ -11,6 +11,13 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -41,6 +48,9 @@ const formSchema = z.object({
   phoneNumber: z.string().min(2, {
     message: "Please input phone number.",
   }),
+  paypalId: z.string().min(2, {
+    message: "Please input paypal id.",
+  }),
 });
 
 export default function AdditionalFormPage() {
@@ -53,8 +63,9 @@ export default function AdditionalFormPage() {
       dob: "",
       gender: "",
       address: "",
-      city: "",
+      city: "Select city",
       phoneNumber: "",
+      paypalId: "",
     },
   });
 
@@ -70,6 +81,7 @@ export default function AdditionalFormPage() {
       address: values.address,
       city: values.city,
       phoneNumber: values.phoneNumber,
+      paypalId: values.paypalId,
     };
     await addOrChangeUserData(user.uid, newUserData);
     router.push("/my-profile");
@@ -85,7 +97,7 @@ export default function AdditionalFormPage() {
   }, []);
   return (
     <div className="flex justify-center">
-      <div className="max-w-[90%] md:w-[700px] shadow rounded-xl p-7 my-9 bg-white">
+      <div className="w-[90%] md:w-[700px] shadow rounded-xl p-7 my-9 bg-white">
         <h1 className="font-bold text-2xl text-blue-600 text-center mb-6">
           Additional Form
         </h1>
@@ -191,13 +203,24 @@ export default function AdditionalFormPage() {
               render={({ field }) => (
                 <FormItem className="space-y-0">
                   <FormLabel>City</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="input city"
-                      {...form.register("city")}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    // defaultValue={field.value}
+                    // value={field.value}
+                    {...form.register("city")}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select city" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Bogor">Bogor</SelectItem>
+                      <SelectItem value="Banyuwangi">Banyuwangi</SelectItem>
+                      <SelectItem value="Gresik">Gresik</SelectItem>
+                      <SelectItem value="Bekasi">Bekasi</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -213,6 +236,23 @@ export default function AdditionalFormPage() {
                       type="text"
                       placeholder="input phone number"
                       {...form.register("phoneNumber")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="paypalId"
+              render={({ field }) => (
+                <FormItem className="space-y-0">
+                  <FormLabel>Paypal ID</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="input paypal id"
+                      {...form.register("paypalId")}
                     />
                   </FormControl>
                   <FormMessage />

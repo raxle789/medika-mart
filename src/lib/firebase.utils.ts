@@ -12,19 +12,18 @@ import {
   doc,
   getDoc,
   setDoc,
-  deleteDoc,
   collection,
 } from "firebase/firestore";
 import "firebase/compat/firestore";
 
-// Your web app's Firebase configuration
+// web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB3tu5cGDP6NMhbL93THjWfCdSQVRNdcs4",
-  authDomain: "medikamart-24e8c.firebaseapp.com",
-  projectId: "medikamart-24e8c",
-  storageBucket: "medikamart-24e8c.appspot.com",
-  messagingSenderId: "728173955510",
-  appId: "1:728173955510:web:dda0a481af256fb8fa5917",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
@@ -52,6 +51,7 @@ export type TUserDoc = {
   address: string;
   city: string;
   phoneNumber: string;
+  paypalId: string;
 };
 
 export const addOrChangeUserData = async (

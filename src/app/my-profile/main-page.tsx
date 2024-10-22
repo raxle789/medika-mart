@@ -9,9 +9,6 @@ import { useAppSelector, useAppDispatch } from "@/redux/hook";
 import { setSection } from "@/redux/features/profile-section";
 import type { RootState } from "@/redux/store";
 import { TCheckoutData } from "@/components/header";
-// import { TUserData } from "@/components/header";
-// import { useAppDispatch } from "@/redux/hook";
-// import { setUserData } from "@/redux/features/user-data-slice";
 import { TUserDoc, addOrChangeUserData } from "@/lib/firebase.utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -26,6 +23,20 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import {
+  DropdownMenu,
+  DropdownMenuLabel,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCaption,
@@ -36,6 +47,7 @@ import {
 } from "@/components/ui/table";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
+import { AlignLeft } from "lucide-react";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -60,6 +72,9 @@ const formSchema = z.object({
   phoneNumber: z.string().min(2, {
     message: "Please input phone number.",
   }),
+  paypalId: z.string().min(2, {
+    message: "Please input paypal id.",
+  }),
 });
 
 export default function MainPage() {
@@ -75,6 +90,7 @@ export default function MainPage() {
   const profileSection = useAppSelector(
     (state: RootState) => state.profileSection
   );
+  const checkoutData = useAppSelector((state: RootState) => state.checkout);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -84,6 +100,7 @@ export default function MainPage() {
       address: "",
       city: "",
       phoneNumber: "",
+      paypalId: "",
     },
   });
 
@@ -113,7 +130,6 @@ export default function MainPage() {
     const data = await getUserField(user.uid);
     if (data && isTUserDoc(data)) {
       setPersonalData(data);
-      // dispatch(setUserData(data));
     } else {
       console.log("Data doesn't match for TUserDoc type or doesn't exist");
     }
@@ -132,6 +148,7 @@ export default function MainPage() {
         address: values.address,
         city: values.city,
         phoneNumber: values.phoneNumber,
+        paypalId: values.paypalId,
       };
       await addOrChangeUserData(user.uid, newUserData);
       setIsLoading(false);
@@ -144,18 +161,31 @@ export default function MainPage() {
     const user = getUserDataFromCookies();
     if (user) {
       console.log({ user });
+      getPersonalData();
+      getActivityDoc(user.uid, "checkout")
+        .then((result) => {
+          setCheckout(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     } else {
       router.replace("/");
     }
-    getPersonalData();
-    getActivityDoc(user.uid, "checkout")
-      .then((result) => {
-        setCheckout(result);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
   }, []);
+
+  useEffect(() => {
+    const user = getUserDataFromCookies();
+    if (user) {
+      getActivityDoc(user.uid, "checkout")
+        .then((result) => {
+          setCheckout(result);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [checkoutData]);
 
   useEffect(() => {
     console.log("checkout history: ", checkout);
@@ -171,12 +201,13 @@ export default function MainPage() {
         address: personalData.address || "",
         city: personalData.city || "",
         phoneNumber: personalData.phoneNumber || "",
+        paypalId: personalData.paypalId || "",
       });
     }
   }, [personalData, form]);
   return (
     <section className="flex gap-6 px-6 py-9 h-full">
-      <div className="w-[20%] h-fit z-50 sticky top-[110px] flex flex-col items-center justify-center p-4 rounded-xl bg-card text-card-foreground shadow">
+      <div className="hidden w-[20%] h-fit z-50 sticky top-[110px] lg:flex flex-col items-center justify-center p-4 rounded-xl bg-card text-card-foreground shadow">
         <Button
           className={`w-full justify-start rounded-lg text-[15px] ${
             profileSection.section === "personal data" ? "bg-accent" : ""
@@ -196,7 +227,7 @@ export default function MainPage() {
           Purchase History
         </Button>
       </div>
-      <div className="w-[80%] min-h-[500px] py-8 px-9 rounded-xl bg-card text-card-foreground shadow">
+      <div className="w-full lg:w-[80%] min-h-[500px] py-8 px-9 rounded-xl bg-card text-card-foreground shadow">
         {profileSection.section === "personal data" && (
           <div>
             <div className="flex justify-between mb-4">
@@ -397,14 +428,34 @@ export default function MainPage() {
                         )}
                         {edit && (
                           <>
-                            <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={personalData?.city}
+                              // value={field.value}
+                              {...form.register("city")}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="col-span-4 mb-1">
+                                  <SelectValue placeholder="Select city" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Bogor">Bogor</SelectItem>
+                                <SelectItem value="Banyuwangi">
+                                  Banyuwangi
+                                </SelectItem>
+                                <SelectItem value="Gresik">Gresik</SelectItem>
+                                <SelectItem value="Bekasi">Bekasi</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {/* <FormControl>
                               <Input
                                 className="col-span-4 mb-1"
                                 type="text"
                                 placeholder="input city"
                                 {...form.register("city")}
                               />
-                            </FormControl>
+                            </FormControl> */}
                             <div className="col-span-1"></div>
                             <FormMessage className="col-span-4" />
                           </>
@@ -448,6 +499,40 @@ export default function MainPage() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="paypalId"
+                  render={({ field }) => (
+                    <FormItem className="space-y-0">
+                      <div className="grid rid-cols-1 md:grid-cols-5">
+                        <p className="col-span-1 mb-1 font-semibold">
+                          Paypal ID
+                        </p>
+                        {!edit && (
+                          <div className="col-span-4 mb-1 flex items-center">
+                            {personalData?.paypalId ?? (
+                              <Skeleton className="h-4 w-full" />
+                            )}
+                          </div>
+                        )}
+                        {edit && (
+                          <>
+                            <FormControl>
+                              <Input
+                                className="col-span-4 mb-1"
+                                type="text"
+                                placeholder="input paypal id"
+                                {...form.register("paypalId")}
+                              />
+                            </FormControl>
+                            <div className="col-span-1"></div>
+                            <FormMessage className="col-span-4" />
+                          </>
+                        )}
+                      </div>
+                    </FormItem>
+                  )}
+                />
                 {edit && (
                   <div className="flex justify-between">
                     <div></div>
@@ -466,51 +551,8 @@ export default function MainPage() {
                     </Button>
                   </div>
                 )}
-                {/* </div> */}
               </form>
             </Form>
-
-            {/* <p className="col-span-1 mb-1 font-semibold">Email</p>
-              {!edit && (
-                <div className="col-span-4 mb-1 flex items-center">
-                  {personalData?.email ?? <Skeleton className="h-4 w-full" />}
-                </div>
-              )}
-              <p className="col-span-1 mb-1 font-semibold">Gender</p>
-              {!edit && (
-                <div className="col-span-4 mb-1 capitalize flex items-center">
-                  {personalData?.gender ?? <Skeleton className="h-4 w-full" />}
-                </div>
-              )}
-              <p className="col-span-1 mb-1 font-semibold">Date of birth</p>
-              {!edit && (
-                <div className="col-span-4 mb-1 flex items-center">
-                  {personalData?.dateOfBirth ?? (
-                    <Skeleton className="h-4 w-full" />
-                  )}
-                </div>
-              )}
-              <p className="col-span-1 mb-1 font-semibold">Address</p>
-              {!edit && (
-                <div className="col-span-4 mb-1 capitalize flex items-center">
-                  {personalData?.address ?? <Skeleton className="h-4 w-full" />}
-                </div>
-              )}
-              <p className="col-span-1 mb-1 font-semibold">City</p>
-              {!edit && (
-                <div className="col-span-4 mb-1 flex items-center capitalize">
-                  {personalData?.city ?? <Skeleton className="h-4 w-full" />}
-                </div>
-              )}
-              <p className="col-span-1 mb-1 font-semibold">Phone Number</p>
-              {!edit && (
-                <div className="col-span-4 mb-1 flex items-center">
-                  {personalData?.phoneNumber ?? (
-                    <Skeleton className="h-4 w-full" />
-                  )}
-                </div>
-              )} */}
-            {/* </div> */}
           </div>
         )}
         {profileSection.section === "purchase history" && (
@@ -579,20 +621,25 @@ export default function MainPage() {
                                   <strong>Details:</strong>
                                 </h3>
                                 <div className="flex flex-col gap-2">
-                                  {item.cart.map((cartItem: any) => (
-                                    <div className="grid grid-cols-3 gap-3">
-                                      <Image
-                                        className="w-14 h-auto"
-                                        src={cartItem.url}
-                                        alt="product image"
-                                      />
-                                      <p>{cartItem.name}</p>
-                                      <p>
-                                        IDR {cartItem.price.toLocaleString()} x{" "}
-                                        {cartItem.quantity}
-                                      </p>
-                                    </div>
-                                  ))}
+                                  {item.cart.map(
+                                    (cartItem: any, index: number) => (
+                                      <div
+                                        key={index}
+                                        className="grid grid-cols-3 gap-3"
+                                      >
+                                        <Image
+                                          className="w-14 h-auto"
+                                          src={cartItem.url}
+                                          alt="product image"
+                                        />
+                                        <p>{cartItem.name}</p>
+                                        <p>
+                                          IDR {cartItem.price.toLocaleString()}{" "}
+                                          x {cartItem.quantity}
+                                        </p>
+                                      </div>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             </TableCell>
@@ -605,6 +652,31 @@ export default function MainPage() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end pt-5 fixed right-0 top-[72px] z-30 lg:hidden">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="rounded-l-full px-3">
+              <AlignLeft />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Section</DropdownMenuLabel>
+            <DropdownMenuItem
+              className="hover:cursor-pointer"
+              onClick={() => handleSectionState("personal data")}
+            >
+              Personal Data
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="hover:cursor-pointer"
+              onClick={() => handleSectionState("purchase history")}
+            >
+              Purchase History
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </section>
   );

@@ -18,11 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth scroll-pt-[70px]">
-      <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        className={`${inter.className} antialiased bg-[#f7f7f7]`}
-      >
+    <html lang="en" className="scroll-smooth scroll-pt-[90px]">
+      <body className={`${inter.className} antialiased bg-[#f7f7f7]`}>
         <Providers>
           <main>{children}</main>
         </Providers>

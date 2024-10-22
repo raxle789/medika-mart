@@ -1,5 +1,3 @@
-// import { storage } from "@/lib/firebase.utils";
-// import { getDownloadURL, ref } from "firebase/storage";
 import alatCekGulaDarah from "../../public/assets/images/alat-cek-gula-darah.jpg";
 import alatUkurTekananDarah from "../../public/assets/images/alat-ukur-tekanan-darah.jpeg";
 import stetoskop from "../../public/assets/images/stetoskop.jpg";
@@ -22,55 +20,9 @@ import disinfektan from "../../public/assets/images/disinfektan.jpeg";
 import sabunAntibakteri from "../../public/assets/images/sabun-antibakteri.jpg";
 import { StaticImageData } from "next/image";
 
-// Fungsi untuk mengambil URL gambar
-// async function getImageURL(fileName: string) {
-//   const storageRef = ref(storage, `products/${fileName}`);
-//   try {
-//     const url = await getDownloadURL(storageRef);
-
-//     // Membuat XMLHttpRequest untuk mendownload gambar
-//     // const xhr = new XMLHttpRequest();
-//     // xhr.responseType = "blob";
-
-//     // const imageBlobPromise = new Promise<string>((resolve, reject) => {
-//     //   xhr.onload = () => {
-//     //     if (xhr.status === 200) {
-//     //       const blob = xhr.response;
-//     //       // Menghasilkan URL blob lokal dari response
-//     //       const localUrl = URL.createObjectURL(blob);
-//     //       resolve(localUrl); // Mengembalikan URL blob
-//     //     } else {
-//     //       reject(new Error(`Failed to download image. Status: ${xhr.status}`));
-//     //     }
-//     //   };
-
-//     //   xhr.onerror = () => {
-//     //     reject(new Error("Error during the image download"));
-//     //   };
-
-//     //   xhr.open("GET", url);
-//     //   xhr.send();
-//     // });
-
-//     // return imageBlobPromise;
-
-//     // Menggunakan fetch untuk mengambil gambar sebagai blob
-//     // const response = await fetch(url);
-//     // const blob = await response.blob();
-
-//     // Membuat URL blob dari gambar
-//     // const localUrl = URL.createObjectURL(blob);
-//     // return localUrl;
-
-//     // console.log("Image URL:", url);
-//     return url;
-//   } catch (error) {
-//     console.error("Error getting image URL", error);
-//   }
-// }
-
 type TProduct = {
   category: string;
+  url_link: string;
   items: {
     id: number;
     name: string;
@@ -82,6 +34,7 @@ type TProduct = {
 export const products: TProduct[] = [
   {
     category: "Diagnostic Devices",
+    url_link: "diagnostic-devices",
     items: [
       {
         id: 1,
@@ -111,6 +64,7 @@ export const products: TProduct[] = [
   },
   {
     category: "General Medical Equipment",
+    url_link: "general-medical-equipment",
     items: [
       {
         id: 5,
@@ -152,6 +106,7 @@ export const products: TProduct[] = [
   },
   {
     category: "Rehabilitation Equipment",
+    url_link: "rehabilitation-equipment",
     items: [
       {
         id: 11,
@@ -175,6 +130,7 @@ export const products: TProduct[] = [
   },
   {
     category: "Nursing Equipment",
+    url_link: "nursing-equipment",
     items: [
       {
         id: 14,
@@ -204,6 +160,7 @@ export const products: TProduct[] = [
   },
   {
     category: "Hygienic Equipment",
+    url_link: "hygienic-equipment",
     items: [
       {
         id: 18,
@@ -226,39 +183,3 @@ export const products: TProduct[] = [
     ],
   },
 ];
-
-// const fileNames: string[] = [
-//   "alat-cek-gula-darah.jpg",
-//   "alat-ukur-tekanan-darah.jpeg",
-//   "stetoskop.jpg",
-//   "termometer.png",
-//   "alkohol.jpg",
-//   "kapas.jpg",
-//   "masker-medis.jpg",
-//   "perban.jpg",
-//   "plester.jpg",
-//   "sarung-tangan-medis.jpg",
-//   "alat-bantu-duduk.jpg",
-//   "kruk.jpg",
-//   "kursi-roda.jpeg",
-//   "cairan-infus.jpg",
-//   "kantong-urine.png",
-//   "spuit.jpeg",
-//   "jarum-suntik.jpg",
-//   "alat-sterilisasi.jpg",
-//   "disinfektan.jpeg",
-//   "sabun-antibakteri.jpg",
-// ];
-
-// async function updateProductUrls() {
-//   let k = 0;
-//   for (let i = 0; i < products.length; i++) {
-//     for (let j = 0; j < products[i].items.length; j++) {
-//       const imageUrl = await getImageURL(fileNames[k]);
-//       products[i].items[j].url = imageUrl || "";
-//       k++;
-//     }
-//   }
-// }
-
-// updateProductUrls();

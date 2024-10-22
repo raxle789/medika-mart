@@ -5,19 +5,30 @@ import storage from "redux-persist/lib/storage";
 import cartSlice from "./features/cart-slice";
 import profileSectionSlice from "./features/profile-section";
 import cartFetchSlice from "./features/cart-fetch-slice";
-// import userDataSlice from "./features/user-data-slice";
-// import authSlice from "./features/auth-slice";
+import checkoutSlice from "./features/checkout-data-slice";
+import saveCheckoutSlice from "./features/save-checkout-pass";
+import transactionResultSlice from "./features/transaction-result-slice";
 
 const rootReducer = combineReducers({
   cart: cartSlice,
   profileSection: profileSectionSlice,
   cartFetchAuthorized: cartFetchSlice,
+  checkout: checkoutSlice,
+  saveCheckoutPass: saveCheckoutSlice,
+  transactionResult: transactionResultSlice,
 });
 
 const persistConfig = {
   key: "medikaMart",
   storage,
-  whitelist: ["cart", "profileSection", "cartFetchAuthorized"],
+  whitelist: [
+    "cart",
+    "profileSection",
+    "cartFetchAuthorized",
+    "checkout",
+    "saveCheckoutPass",
+    "transactionResult",
+  ],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
