@@ -270,13 +270,13 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
 
   // Function to handle sign out
   const handleSignOut = async () => {
-    await signOutUser();
     if (isLogin && isLogin.uid) {
       const cartItemsObj = {
         cartItems: cartItemsNow,
       };
       await addCollectionAndDocument(isLogin.uid, "cart", cartItemsObj);
     }
+    await signOutUser();
     console.log("user signed out!");
     // Remove user data from cookies
     Cookies.remove("medikaMart-userData");
