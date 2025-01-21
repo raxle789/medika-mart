@@ -561,7 +561,7 @@ export default function MainPage() {
               Purchase History
             </h2>
             <div>
-              <Table>
+              <Table className="purchase-table">
                 <TableCaption>A list of your recent invoices.</TableCaption>
                 <TableHeader>
                   <TableRow className="bg-muted/50">

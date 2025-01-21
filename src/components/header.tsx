@@ -641,11 +641,11 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
             <Drawer open={isDrawerOpen} onClose={handleDrawerState}>
               <DrawerTrigger asChild>
                 <Button
-                  className="h-full font-semibold hover:bg-transparent active:bg-transparent"
+                  className="text-base h-full font-semibold hover:bg-transparent active:bg-transparent"
                   variant="ghost"
                   onClick={handleDrawerState}
                 >
-                  Log In/Sign Up
+                  Log In
                 </Button>
               </DrawerTrigger>
               <DrawerContent className="flex justify-center items-center">
