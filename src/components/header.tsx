@@ -478,7 +478,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
   }, []);
 
   useEffect(() => {
-    const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const snapScript = "https://app.midtrans.com/snap/snap.js";
     const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
 
     const script = document.createElement("script");
