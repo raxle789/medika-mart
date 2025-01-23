@@ -60,7 +60,6 @@ export const addOrChangeUserData = async (
 ) => {
   const userDocRef = doc(db, "users", uid);
   await setDoc(userDocRef, objectsToAdd, { merge: true });
-  console.log("done add or change user data");
 };
 
 export const getUserField = async (uid: string) => {
@@ -69,7 +68,6 @@ export const getUserField = async (uid: string) => {
   if (docSnapshot.exists()) {
     return docSnapshot.data();
   } else {
-    console.log("user doesn't exist");
     return "undefined";
   }
 };
@@ -84,7 +82,6 @@ export const addCollectionAndDocument = async (
   const collectionRef = collection(userDocRef, "user's activity");
   const docRef = doc(collectionRef, docTitle);
   await setDoc(docRef, objectsToAdd, { merge: true });
-  console.log("done add collection and doc");
 };
 
 export const getActivityDoc = async (uid: string, docTitle: string) => {
@@ -93,7 +90,6 @@ export const getActivityDoc = async (uid: string, docTitle: string) => {
   const docSnapshot = await getDoc(docRef);
   if (docSnapshot.exists()) {
     const data = docSnapshot.data();
-    console.log("firebase util: ", docSnapshot.data());
     return data;
   } else {
     return { message: "data not found" };

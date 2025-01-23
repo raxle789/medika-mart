@@ -57,7 +57,6 @@ export default function Home() {
         price: price,
         url: url,
       };
-      console.log({ newItem });
       dispatch(setAddItem(newItem));
       toast({
         title: "Item added to cart!",
@@ -73,7 +72,7 @@ export default function Home() {
       // console.log({ user });
       // setIsLogin(user);
     } else {
-      console.log("No user data found in cookies.");
+      // console.log("No user data found in cookies.");
     }
   }, []);
   return (

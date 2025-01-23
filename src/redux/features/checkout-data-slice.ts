@@ -11,7 +11,7 @@ export const checkoutSlice = createSlice({
   initialState,
   reducers: {
     setFillItem: (state, action: PayloadAction<TCheckoutData>) => {
-      console.log("checkoutSlicePayload: ", action.payload);
+      // console.log("checkoutSlicePayload: ", action.payload);
       state.data = action.payload.data;
     },
     setEmptyItem: (state, action: PayloadAction<string>) => {

@@ -45,8 +45,8 @@ export const cartSlice = createSlice({
   initialState,
   reducers: {
     setAddItem: (state, action: PayloadAction<IItem>) => {
-      console.log("addCartPayload: ", action.payload);
-      console.log("state.items: ", state.items);
+      // console.log("addCartPayload: ", action.payload);
+      // console.log("state.items: ", state.items);
       // console.log({ state.itemsAmount });
       let itemFound: any;
       let itemTotalFound: any;
@@ -59,7 +59,7 @@ export const cartSlice = createSlice({
         );
       }
       if (!itemFound) {
-        console.log({ itemFound });
+        // console.log({ itemFound });
         state.items.push(action.payload);
       }
 

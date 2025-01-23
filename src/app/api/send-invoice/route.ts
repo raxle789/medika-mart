@@ -4,7 +4,6 @@ import { NextResponse, NextRequest } from "next/server";
 export async function POST(request: NextRequest) {
   const recipient = request.headers.get("Recipient");
   const pdfBuffer = Buffer.from(await request.arrayBuffer());
-  console.log(recipient);
 
   const transporter = nodemailer.createTransport({
     service: "gmail",

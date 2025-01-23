@@ -61,7 +61,6 @@ export default function MainPage() {
       }
 
       const data = await response.json();
-      console.log("hasil fetch transaction result: ", data);
       setTransactionResult(data);
     } catch (error: any) {
       console.log(error.message);
@@ -93,7 +92,7 @@ export default function MainPage() {
     });
 
     if (response.ok) {
-      console.log("Email sent successfully!");
+      // console.log("Email sent successfully!");
     } else {
       console.error("Error sending email");
     }
@@ -108,7 +107,6 @@ export default function MainPage() {
 
   useEffect(() => {
     if (user) {
-      console.log({ user });
       if (checkoutData && checkoutData?.data) {
         const orderId =
           checkoutData?.data[checkoutData.data.length - 1].orderId;
@@ -120,10 +118,6 @@ export default function MainPage() {
       router.replace("/");
     }
   }, []);
-
-  useEffect(() => {
-    console.log({ transactionResult });
-  }, [transactionResult]);
   return (
     <section>
       <div className="px-6 lg:px-10 flex items-center justify-center">

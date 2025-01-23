@@ -71,7 +71,6 @@ export default function AdditionalFormPage() {
 
   async function onSubmit(values: any) {
     setIsLoading(true);
-    console.log("onSubmit additional form: ", values);
     const user = getUserDataFromCookies();
     const newUserData: TUserDoc = {
       username: values.username,
@@ -90,7 +89,7 @@ export default function AdditionalFormPage() {
   useEffect(() => {
     const user = getUserDataFromCookies();
     if (user) {
-      console.log({ user });
+      // console.log({ user });
     } else {
       router.replace("/");
     }

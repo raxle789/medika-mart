@@ -178,12 +178,10 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
           displayName: data.displayName,
         };
         // setUserData(userSigned);
-        console.log("data: ", data);
         // Simpan data pengguna ke dalam cookie
         Cookies.set("medikaMart-userData", JSON.stringify(userSigned), {
           expires: 3,
         }); // Cookie disimpan selama 3 hari
-        console.log("cookies created");
         setIsLogin(userSigned);
         // router.push("/my-documents");
         const confirm = await getUserField(data.uid);
@@ -207,7 +205,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       // Pengguna berhasil sign up
       const user = userCredential.user;
 
-      console.log("User berhasil didaftarkan:", user);
       const userSigned: TUserData = {
         uid: user.uid,
         email: user.email,
@@ -220,7 +217,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       Cookies.set("medikaMart-userData", JSON.stringify(userSigned), {
         expires: 3,
       }); // Cookie disimpan selama 3 hari
-      console.log("cookies created");
       setIsLogin(userSigned);
       setErrorAuth(false);
       router.push("/additional-form");
@@ -240,7 +236,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       );
       // Pengguna berhasil sign in
       const user = userCredential.user;
-      console.log("User berhasil login:", user);
 
       const userSigned: TUserData = {
         uid: user.uid,
@@ -254,7 +249,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       Cookies.set("medikaMart-userData", JSON.stringify(userSigned), {
         expires: 3,
       }); // Cookie disimpan selama 3 hari
-      console.log("cookies created");
       setIsLogin(userSigned);
       setErrorAuth(false);
       handleDrawerState();
@@ -277,10 +271,8 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       await addCollectionAndDocument(isLogin.uid, "cart", cartItemsObj);
     }
     await signOutUser();
-    console.log("user signed out!");
     // Remove user data from cookies
     Cookies.remove("medikaMart-userData");
-    console.log("cookies removed");
     setIsLogin(null);
     const fillOrEmptyPayload = {
       type: "empty",
@@ -295,7 +287,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     if (logInState === "Log in") {
       signInWithEmail(values.email, values.password);
     } else {
@@ -335,7 +326,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       orderId: id,
       cart: [],
       totalPrice: totalPrice,
-      // customerData: userData,
     };
     cartItems.items.forEach((item: any, index: number) => {
       const newItem = {
@@ -344,7 +334,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       };
       data.cart.push(newItem);
     });
-    // console.log({ data });
 
     const response = await fetch("/api/midtrans-tokenizer", {
       method: "POST",
@@ -352,19 +341,8 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
     });
 
     const requestData = await response.json();
-    // console.log({ requestData });
     (window as any).snap.pay(requestData.token);
   };
-
-  // useEffect(() => {
-  //   if (pathname.includes("/my-profile")) {
-  //     setSearchInput(false);
-  //   } else if (pathname.includes("/checkout")) {
-  //     setSearchInput(false);
-  //   } else {
-  //     setSearchInput(true);
-  //   }
-  // }, [pathname]);
 
   useEffect(() => {
     const user = getUserDataFromCookies();
@@ -390,11 +368,10 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
         newCheckoutData.data.push(data);
       }
 
-      console.log({ newCheckoutData });
       dispatch(setFillItem(newCheckoutData));
       saveActivityDocHandler(user.uid, newCheckoutData)
         .then((result) => {
-          console.log("save checkout is successful: ", result);
+          // console.log("save checkout is successful: ", result);
         })
         .catch((error) => {
           console.error("Something went wrong:", error);
@@ -411,7 +388,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
       if (isLogin && isLogin.uid) {
         getActivityDocHandler(isLogin.uid, "cart")
           .then((result) => {
-            console.log("Cart Items:", result.cartItems);
             const fillOrEmptyPayload = {
               type: "fill",
               data: result.cartItems,
@@ -423,7 +399,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
           });
         getActivityDocHandler(isLogin.uid, "checkout")
           .then((result) => {
-            console.log("checkout fetch result: ", result);
             // setCheckoutData(result);
             dispatch(setFillItem(result));
           })
@@ -436,7 +411,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
   }, [isLogin]);
 
   useEffect(() => {
-    console.log({ cartItems });
     const currentItems: TCartItem[] = [];
     let totalPriceNow: number = 0;
     if (cartItems.items) {
@@ -458,19 +432,14 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
         totalPriceNow += newItem.subTotal;
       });
     }
-    console.log({ currentItems });
     setCartItemsNow(currentItems);
     setTotalPrice(totalPriceNow);
   }, [cartItems]);
 
   useEffect(() => {
-    console.log({ cartFetchPass });
-  }, [cartFetchPass]);
-
-  useEffect(() => {
     const user = getUserDataFromCookies();
     if (user) {
-      console.log({ user });
+      // console.log({ user });
       setIsLogin(user);
     } else {
       console.log("No user data found in cookies.");
@@ -479,6 +448,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
 
   useEffect(() => {
     const snapScript = "https://app.midtrans.com/snap/snap.js";
+    // const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
     const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
 
     const script = document.createElement("script");
@@ -502,25 +472,11 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
         >
           MedikaMart
         </h1>
-        <div className="flex items-center gap-3 h-10">
-          {/*{searchInput && (
-            <form className="flex h-full">
-              <Input
-                className="rounded-r-none h-full focus-visible:ring-0"
-                placeholder="Search"
-              />
-              <Button
-                className="rounded-l-none bg-blue-600 hover:bg-blue-400 h-full"
-                type="submit"
-              >
-                <Search />
-              </Button>
-            </form>
-          )}*/}
+        <div className="flex items-center h-10 md:gap-3">
           <Sheet>
             <SheetTrigger asChild>
               <Button
-                className="h-full hover:bg-transparent active:bg-transparent"
+                className="h-full hover:bg-transparent active:bg-transparent px-0 md:px-4"
                 variant="ghost"
               >
                 <ShoppingCart className="mr-1" />
@@ -610,24 +566,14 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
                   <AvatarImage src="https://github.com/shadcn.png" />
                   <AvatarFallback></AvatarFallback>
                 </Avatar>
-                {/* <Avatar className="hover:cursor-pointer">
-                  <AvatarImage
-                    className="object-cover"
-                    src={avatar}
-                    alt="avatar-image"
-                  />
-                  <AvatarFallback>{initial ?? "SW"}</AvatarFallback>
-                </Avatar> */}
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {/* <DialogTrigger asChild> */}
                 <DropdownMenuItem
                   className="hover:cursor-pointer"
                   onClick={() => router.push("/my-profile")}
                 >
                   My profile
                 </DropdownMenuItem>
-                {/* </DialogTrigger> */}
                 <DropdownMenuItem
                   className="hover:cursor-pointer"
                   onClick={handleSignOut}
@@ -641,7 +587,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
             <Drawer open={isDrawerOpen} onClose={handleDrawerState}>
               <DrawerTrigger asChild>
                 <Button
-                  className="text-base h-full font-semibold hover:bg-transparent active:bg-transparent"
+                  className="text-base h-full font-semibold hover:bg-transparent active:bg-transparent pr-0 md:pr-4"
                   variant="ghost"
                   onClick={handleDrawerState}
                 >
@@ -655,9 +601,6 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
                 </DrawerHeader>
                 <div className="mb-10 px-5 pt-7 pb-8 flex flex-col items-center justify-center w-[95%] md:w-[350px] border rounded-xl shadow">
                   <div className="flex flex-col justify-center items-center">
-                    {/* <h1 className="text-2xl font-bold text-blue-600">
-                      MedikaMart
-                    </h1> */}
                     <h2 className="text-2xl font-bold mb-6 text-blue-600">
                       {logInState}
                     </h2>

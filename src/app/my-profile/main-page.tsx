@@ -138,7 +138,6 @@ export default function MainPage() {
   async function onSubmit(values: any) {
     if (personalData) {
       setIsLoading(true);
-      console.log("edit personal data: ", values);
       const user = getUserDataFromCookies();
       const newUserData: TUserDoc = {
         username: values.username,
@@ -160,7 +159,6 @@ export default function MainPage() {
   useEffect(() => {
     const user = getUserDataFromCookies();
     if (user) {
-      console.log({ user });
       getPersonalData();
       getActivityDoc(user.uid, "checkout")
         .then((result) => {
@@ -188,11 +186,6 @@ export default function MainPage() {
   }, [checkoutData]);
 
   useEffect(() => {
-    console.log("checkout history: ", checkout);
-  }, [checkout]);
-
-  useEffect(() => {
-    console.log({ personalData });
     if (personalData) {
       form.reset({
         username: personalData.username || "",
