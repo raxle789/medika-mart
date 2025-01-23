@@ -562,7 +562,7 @@ export default function Header({ isDrawerOpen, setIsDrawerOpen }: TProps) {
           {isLogin && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="hover:cursor-pointer">
+                <Avatar className="ml-3 md:ml-0 hover:cursor-pointer">
                   <AvatarImage src="https://github.com/shadcn.png" />
                   <AvatarFallback></AvatarFallback>
                 </Avatar>
