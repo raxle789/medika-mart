@@ -26,7 +26,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import bannerImg from "../../public/assets/images/banner1.jpg";
-import { IoCheckmarkCircle } from "react-icons/io5";
 import { products } from "@/utils/products";
 import { FaFacebookF } from "react-icons/fa";
 import { FaTwitter } from "react-icons/fa";
@@ -87,11 +86,11 @@ export default function Home() {
           src={bannerImg}
           alt="banner"
         />
-        <div className="relative z-10 flex flex-col justify-center items-start h-full text-white px-5 lg:px-10">
+        <div className="relative z-10 flex flex-col justify-center items-start h-full text-white px-3 sm:px-5 lg:px-10">
           <h1 className="text-[1.6rem] tracking-wide md:text-4xl lg:text-5xl font-bold text-coolyellow">
             All Medical Needs, One Solution.
           </h1>
-          <div className="flex items-center justify-start gap-1 mt-0 lg:gap-3 xl:mt-3">
+          <div className="flex items-center justify-start flex-wrap mt-0 lg:gap-3 xl:mt-3">
             <h2 className="text-xl font-semibold py-4 px-2 pl-0 md:pr-4 xl:px-0">
               Easy
             </h2>
@@ -156,10 +155,6 @@ export default function Home() {
               </g>
             </svg>
           </div>
-          {/* <div>
-            <h2 className="font-bold text-xl">Number of Sales:</h2>
-            <p>2500+</p>
-          </div> */}
         </div>
         <div className="absolute inset-0 bg-black opacity-40 z-0" />
       </div>
